@@ -4,38 +4,54 @@ using System.IO;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
+using System.Collections;
 
 namespace GWENT_Logic
 {
-    public class JuegoGWENT
+    public class JuegoGWENT: IEnumerable<Move>
     {
-
-        public Dictionary<Jugador, Card[,]> field;
-        public Dictionary<Jugador, List<Card>> hand;
-        public Dictionary<Jugador, List<Card>> deck;
-        public Dictionary<Jugador, List<Card>> graveyard;
+        
+        public Dictionary<Jugador, Card[,]> Field { get; private set; }
+        public Dictionary<Jugador, List<Card>> Hand { get; private set; }
+        public Dictionary<Jugador, List<Card>> Deck { get; private set; }
+        public Dictionary<Jugador, List<Card>> Graveyard { get; private set; }
         public Jugador player1;
         public Jugador player2;
 
+        public int Turn { get; private set; }
+        public Jugador PlayerInTurn
+        {
+            get
+            {
+                if (Turn % 2 != 0) return player1;
+                return player2;
+            }
+            set
+            {
+            }
+        }
+
+        public bool IsFinished { get; private set; }
+        public bool InvalidMoveCommitted { get; private set; }
 
         public JuegoGWENT(Jugador player1, Jugador player2)
         {
-            field = new Dictionary<Jugador, Card[,]>
+            Field = new Dictionary<Jugador, Card[,]>
             {
                 [player1] = new Card[2, 5],
                 [player2] = new Card[2, 5]
             };
-            hand = new Dictionary<Jugador, List<Card>>
+            Hand = new Dictionary<Jugador, List<Card>>
             {
                 [player1] = new List<Card>(),
                 [player2] = new List<Card>()
             };
-            graveyard = new Dictionary<Jugador, List<Card>>
+            Graveyard = new Dictionary<Jugador, List<Card>>
             {
                 [player1] = new List<Card>(),
                 [player2] = new List<Card>()
             };
-            deck = new Dictionary<Jugador, List<Card>>
+            Deck = new Dictionary<Jugador, List<Card>>
             {
                 [player1] = player1.Deck.ToList(),
                 [player2] = player2.Deck.ToList()
@@ -43,6 +59,8 @@ namespace GWENT_Logic
             this.player1 = player1;
             this.player2 = player2;
         }
+        
+
 
         public void StarGame()
         {
@@ -52,10 +70,13 @@ namespace GWENT_Logic
             DrawCard(player1, 10);
             DrawCard(player2, 10);
         }
+
+        
+
         public void ShufflingCards(Jugador player)
         {
             Console.WriteLine("ShufflingCards");
-            deck[player] = deck[player].OrderBy(x => new Random().Next(0, deck[player].Count)).ToList();
+            Deck[player] = Deck[player].OrderBy(x => new Random().Next(0, Deck[player].Count)).ToList();
         }
         static void Show(ICollection<Card> cards)
         {
@@ -63,13 +84,18 @@ namespace GWENT_Logic
                 Console.WriteLine(card);
         }
         
-        public void Play(Jugador player, Card card, int[] n)
+        public void ExecuteMove(Move move)
         {
-            Compila(card.Efect(n)); 
-            hand[player].Remove(card);
-
-            if (card.Type != Card.CardType.Especial)
-                field[player][n[0], n[1]] = card;
+            Card card = move.Card;
+            int[] AD = move.AditionalData;
+            if (card.Type == Card.CardType.Especial)           
+                Destroy(PlayerInTurn, card);
+            else
+            {
+                Hand[PlayerInTurn].Remove(card);
+                Field[PlayerInTurn][AD[0], AD[1]] = card;
+            }
+                Compila(card.Efect(AD));
         }
 
         private void Compila(string v)
@@ -80,31 +106,75 @@ namespace GWENT_Logic
         public int Score(Jugador player)
         {
             int score = 0;
-            foreach (Card item in field[player])
+            foreach (Card item in Field[player])
             {
                 score += item.Power;
             }
             return score;
         }
         
-        public bool Discard(Jugador player,Card card)
+        public bool Destroy(Jugador player,Card card)
         {
             Console.WriteLine("Discard");
-            bool discard = hand[player].Remove(card) || deck[player].Remove(card);
+            bool discard = Hand[player].Remove(card) || Deck[player].Remove(card);
             if (discard)
-                graveyard[player].Add(card);
+                Graveyard[player].Add(card);
             return discard;
         }
         public bool DrawCard(Jugador player, int n)
         {
             Console.WriteLine("DrawCard");
-            if (deck[player].Count < n) return false;
+            if (Deck[player].Count < n) return false;
             else
             {
-                hand[player].AddRange(deck[player].TakeLast(n));
-                deck[player].RemoveRange(deck[player].Count - 1 - n, n);
+                Hand[player].AddRange(Deck[player].TakeLast(n));
+                Deck[player].RemoveRange(Deck[player].Count - 1 - n, n);
                 return true;
             }
+        }
+        public void ExecuteNextMove()
+        {
+
+            foreach (Move move in this)
+            {
+                if (!IsAValidMove(move)) PenalizePlayer();
+                else ExecuteMove(move);
+                break;
+            }
+            if (IsFinished && !InvalidMoveCommitted) UpdateScoreTable();
+        }
+
+        private void UpdateScoreTable()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PenalizePlayer()
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool IsAValidMove(Move move)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public IEnumerator<Move> GetEnumerator()
+        {
+            if (IsFinished || InvalidMoveCommitted) throw new InvalidOperationException("Este juego ya se ha terminado");
+            while (!IsFinished)
+            {
+                Turn++;
+               // Move jug = JugadorEnTurno.Jugar(PosiblesJugadas);
+                //jugadas.Add(jug);
+                yield return new Move(true);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         /* public override bool EstaTerminado => throw new NotImplementedException();

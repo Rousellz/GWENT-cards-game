@@ -25,11 +25,11 @@ JuegoGWENT juego = new(ply1,ply2) ;
 //juego.starGame();
 
 Console.WriteLine("deck");
-Show(juego.deck[ply1]);
+Show(juego.Deck[ply1]);
 Console.WriteLine("hand");
-Show(juego.hand[ply1]);
+Show(juego.Hand[ply1]);
 Console.WriteLine("graveyard");
-Show(juego.graveyard[ply1]);
+Show(juego.Graveyard[ply1]);
 //Console.WriteLine("mano");
 //Show(juego.hand[ply1]);
 //juego.ShufflingCards(ply1); 
@@ -37,13 +37,13 @@ Show(juego.graveyard[ply1]);
 
 
 juego.DrawCard(ply1, 4);
-juego.Discard(ply1, juego.hand[ply1][0]);
+juego.Destroy(ply1, juego.Hand[ply1][0]);
 Console.WriteLine("deck");
-Show(juego.deck[ply1]);
+Show(juego.Deck[ply1]);
 Console.WriteLine("hand");
-Show(juego.hand[ply1]);
+Show(juego.Hand[ply1]);
 Console.WriteLine("graveyard");
-Show(juego.graveyard[ply1]);
+Show(juego.Graveyard[ply1]);
 /*Console.WriteLine("mano");
 Show(juego.hand[ply1]);*/
 static void Show(ICollection<Card> cards)
