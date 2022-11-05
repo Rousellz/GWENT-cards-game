@@ -26,12 +26,24 @@ JuegoGWENT juego = new(ply1,ply2) ;
 
 Console.WriteLine("deck");
 Show(juego.deck[ply1]);
+Console.WriteLine("hand");
+Show(juego.hand[ply1]);
+Console.WriteLine("graveyard");
+Show(juego.graveyard[ply1]);
 //Console.WriteLine("mano");
 //Show(juego.hand[ply1]);
-juego.ShufflingCards(ply1); 
+//juego.ShufflingCards(ply1); 
 //juego.StarGame();
+
+
+juego.DrawCard(ply1, 4);
+juego.Discard(ply1, juego.hand[ply1][0]);
 Console.WriteLine("deck");
 Show(juego.deck[ply1]);
+Console.WriteLine("hand");
+Show(juego.hand[ply1]);
+Console.WriteLine("graveyard");
+Show(juego.graveyard[ply1]);
 /*Console.WriteLine("mano");
 Show(juego.hand[ply1]);*/
 static void Show(ICollection<Card> cards)

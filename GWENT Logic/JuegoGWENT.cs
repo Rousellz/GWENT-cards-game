@@ -46,6 +46,7 @@ namespace GWENT_Logic
 
         public void StarGame()
         {
+            Console.WriteLine("StarGame");
             ShufflingCards(player1);
             ShufflingCards(player2);
             DrawCard(player1, 10);
@@ -53,6 +54,7 @@ namespace GWENT_Logic
         }
         public void ShufflingCards(Jugador player)
         {
+            Console.WriteLine("ShufflingCards");
             deck[player] = deck[player].OrderBy(x => new Random().Next(0, deck[player].Count)).ToList();
         }
         static void Show(ICollection<Card> cards)
@@ -87,6 +89,7 @@ namespace GWENT_Logic
         
         public bool Discard(Jugador player,Card card)
         {
+            Console.WriteLine("Discard");
             bool discard = hand[player].Remove(card) || deck[player].Remove(card);
             if (discard)
                 graveyard[player].Add(card);
@@ -94,6 +97,7 @@ namespace GWENT_Logic
         }
         public bool DrawCard(Jugador player, int n)
         {
+            Console.WriteLine("DrawCard");
             if (deck[player].Count < n) return false;
             else
             {
@@ -101,8 +105,6 @@ namespace GWENT_Logic
                 deck[player].RemoveRange(deck[player].Count - 1 - n, n);
                 return true;
             }
-            
-            
         }
 
         /* public override bool EstaTerminado => throw new NotImplementedException();
