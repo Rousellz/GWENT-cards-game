@@ -25,7 +25,7 @@ namespace GWENT_Logic
         /// <summary> Devuelve la jugada seleccionada por el jugador. </summary>
     
         
-        public abstract int Jugar();
+        public abstract Move Play();
 
         public override string ToString()
         {

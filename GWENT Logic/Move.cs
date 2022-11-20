@@ -5,11 +5,12 @@
         public Card Card { get; private set; }
         public int[] AditionalData { get; private set; }
 
-        public bool PassOrGive { get; private set; }
+        public bool Pass { get; private set; }
 
-        public Move(bool passOrGive)
+        public Move(bool pass)
         {
-            PassOrGive = passOrGive;
+         
+             Pass = pass;
 
         }
 

@@ -15,7 +15,7 @@ namespace GWENT_Logic
         }
 
         /// <summary> Devuelve la jugada seleccionada por el jugador. </summary>
-        public override int Jugar()
+        public override Move Play()
         {
             throw new NotImplementedException();
         }

@@ -8,9 +8,10 @@ using System.Collections;
 
 namespace GWENT_Logic
 {
-    public class JuegoGWENT: IEnumerable<Move>
+    public class JuegoGWENT : IEnumerable<Move>
     {
-        
+
+
         public Dictionary<Jugador, Card[,]> Field { get; private set; }
         public Dictionary<Jugador, List<Card>> Hand { get; private set; }
         public Dictionary<Jugador, List<Card>> Deck { get; private set; }
@@ -18,20 +19,20 @@ namespace GWENT_Logic
         public Jugador player1;
         public Jugador player2;
 
+        public Dictionary<Jugador, int> ScoreTable { get; private set; }
+
+
         public int Turn { get; private set; }
-        public Jugador PlayerInTurn
+        public Jugador PlayerInTurn { get; private set; }
+        public Dictionary<Jugador, bool> IsGived { get; private set; }
+        public Dictionary<Jugador, bool> HasPlayed { get; private set; }
+        public bool IsFinished
         {
-            get
-            {
-                if (Turn % 2 != 0) return player1;
-                return player2;
-            }
-            set
+            get => IsGived[player1] && IsGived[player2];
+            private set
             {
             }
         }
-
-        public bool IsFinished { get; private set; }
         public bool InvalidMoveCommitted { get; private set; }
 
         public JuegoGWENT(Jugador player1, Jugador player2)
@@ -56,10 +57,21 @@ namespace GWENT_Logic
                 [player1] = player1.Deck.ToList(),
                 [player2] = player2.Deck.ToList()
             };
+            IsGived = new Dictionary<Jugador, bool>
+            {
+                [player1] = false,
+                [player2] = false,
+            };
+            HasPlayed = new Dictionary<Jugador, bool>
+            {
+                [player1] = false,
+                [player2] = false,
+            };
             this.player1 = player1;
             this.player2 = player2;
+            PlayerInTurn = ((new Random().Next(0, 1) == 0) ? player1 : player2);
         }
-        
+
 
 
         public void StarGame()
@@ -69,9 +81,10 @@ namespace GWENT_Logic
             ShufflingCards(player2);
             DrawCard(player1, 10);
             DrawCard(player2, 10);
+
         }
 
-        
+
 
         public void ShufflingCards(Jugador player)
         {
@@ -83,19 +96,29 @@ namespace GWENT_Logic
             foreach (Card card in cards)
                 Console.WriteLine(card);
         }
-        
+
         public void ExecuteMove(Move move)
         {
+            
+           
+             if (move.Pass)
+            {
+                if (!HasPlayed[PlayerInTurn]) IsGived[PlayerInTurn] = true;
+                return;
+            }
+          
             Card card = move.Card;
             int[] AD = move.AditionalData;
-            if (card.Type == Card.CardType.Especial)           
+            if (card.Type == Card.CardType.Especial)
                 Destroy(PlayerInTurn, card);
+            
             else
             {
                 Hand[PlayerInTurn].Remove(card);
                 Field[PlayerInTurn][AD[0], AD[1]] = card;
             }
-                Compila(card.Efect(AD));
+            Compila(card.Efect(AD));
+
         }
 
         private void Compila(string v)
@@ -112,8 +135,8 @@ namespace GWENT_Logic
             }
             return score;
         }
-        
-        public bool Destroy(Jugador player,Card card)
+
+        public bool Destroy(Jugador player, Card card)
         {
             Console.WriteLine("Discard");
             bool discard = Hand[player].Remove(card) || Deck[player].Remove(card);
@@ -132,31 +155,51 @@ namespace GWENT_Logic
                 return true;
             }
         }
-        public void ExecuteNextMove()
+        public void RunNextMove()
         {
 
             foreach (Move move in this)
             {
-                if (!IsAValidMove(move)) PenalizePlayer();
+                if (!IsAValidMove(move)) PenalizePlayer(PlayerInTurn);
                 else ExecuteMove(move);
                 break;
             }
             if (IsFinished && !InvalidMoveCommitted) UpdateScoreTable();
         }
 
+        public void RunToTheEnd()
+
+        {
+            foreach (Move move in this)
+            {
+                if (!IsAValidMove(move))
+                {
+                    PenalizePlayer(PlayerInTurn);
+                    break;
+                }
+                else ExecuteMove(move);
+            }
+            if (IsFinished && !InvalidMoveCommitted) UpdateScoreTable();
+        }
         private void UpdateScoreTable()
         {
-            throw new NotImplementedException();
+            int ply1Score = Score(player1);
+            int ply2Score = Score(player2);
+            if (ply1Score > ply2Score) ScoreTable[player1]++;
         }
 
-        private void PenalizePlayer()
+        private void PenalizePlayer(Jugador player)
         {
-            throw new NotImplementedException();
+            InvalidMoveCommitted = true;
+            ScoreTable[((player == player1) ? player2 : player1)]++;
         }
 
         private bool IsAValidMove(Move move)
         {
-            throw new NotImplementedException();
+            return Hand[PlayerInTurn].Contains(move.Card);
+
+           
+            
         }
 
 
@@ -166,9 +209,9 @@ namespace GWENT_Logic
             while (!IsFinished)
             {
                 Turn++;
-               // Move jug = JugadorEnTurno.Jugar(PosiblesJugadas);
-                //jugadas.Add(jug);
-                yield return new Move(true);
+
+
+                yield return PlayerInTurn.Play(); ;
             }
         }
 
@@ -176,27 +219,6 @@ namespace GWENT_Logic
         {
             return GetEnumerator();
         }
-
-        /* public override bool EstaTerminado => throw new NotImplementedException();
-
-         protected override List<Jugada> PosiblesJugadas => throw new NotImplementedException();
-
-         protected override Jugador JugadorEnTurno => throw new NotImplementedException();
-
-         protected override void ActualizarTablaPuntuacion()
-         {
-             throw new NotImplementedException();
-         }
-
-         protected override void EjecutarJugada(Jugada jug)
-         {
-             throw new NotImplementedException();
-         }
-
-         protected override bool JugadaEsValida(Jugada jug)
-         {
-             throw new NotImplementedException();
-         }*/
     }
 
 }
