@@ -17,9 +17,9 @@ namespace GWENT_Logic
             Power = power;
         }
 
-        public string Efect(int[] n)
+        public string Efect()
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         public CardType Type { get; }

@@ -70,6 +70,7 @@ namespace GWENT_Logic
             this.player1 = player1;
             this.player2 = player2;
             PlayerInTurn = ((new Random().Next(0, 1) == 0) ? player1 : player2);
+            
         }
 
 
@@ -99,25 +100,24 @@ namespace GWENT_Logic
 
         public void ExecuteMove(Move move)
         {
-            
-           
-             if (move.Pass)
-            {
-                if (!HasPlayed[PlayerInTurn]) IsGived[PlayerInTurn] = true;
-                return;
-            }
-          
+
             Card card = move.Card;
-            int[] AD = move.AditionalData;
+            if (card.Name=="")
+            {
+                IsGived[PlayerInTurn] = true;
+                PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
+                return;  
+            }
+            
             if (card.Type == Card.CardType.Especial)
                 Destroy(PlayerInTurn, card);
             
             else
             {
                 Hand[PlayerInTurn].Remove(card);
-                Field[PlayerInTurn][AD[0], AD[1]] = card;
+                Field[PlayerInTurn][move.Position.Item1, move.Position.Item2] = card;
             }
-            Compila(card.Efect(AD));
+            Compila(card.Efect());
 
         }
 
@@ -199,10 +199,8 @@ namespace GWENT_Logic
 
         private bool IsAValidMove(Move move)
         {
-            return Hand[PlayerInTurn].Contains(move.Card);
-
-           
-            
+            if (!Hand[PlayerInTurn].Contains(move.Card)) Console.WriteLine("This is not a valid move");
+            return Hand[PlayerInTurn].Contains(move.Card);   
         }
 
 
