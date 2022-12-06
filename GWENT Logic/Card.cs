@@ -12,10 +12,8 @@ namespace GWENT_Logic
 
         public Card(string name, int power)
         {
-
+            if (power <= 0) throw new Exception("Power must be greater than 0");
             Name = name;
-            /* Description = description;
-             RecruitmentCost = recruitmentCost;*/
             Power = power;
         }
 
@@ -26,8 +24,7 @@ namespace GWENT_Logic
 
         public CardType Type { get; }
         public string Name { get; }
-        public string Description { get; }
-        public int RecruitmentCost { get; }
+        public string Description { get; } = "";
         public int Power { get; }
 
         public override string ToString()

@@ -4,20 +4,15 @@
     {
         public Card Card { get; private set; }
         public int[] AditionalData { get; private set; }
-
+        public (int, int) Position { get; private set; }
         public bool Pass { get; private set; }
 
-        public Move(bool pass)
+        public Move(Card card, (int, int) position, int[] aditionalData)
         {
-         
-             Pass = pass;
-
-        }
-
-        public Move(Card card, int[] aditionalData)
-        {
+            Pass = false;
             Card = card;
             AditionalData = aditionalData;
+            Position = position;
         }
     }
 }

@@ -123,7 +123,7 @@ namespace GWENT_Logic
 
         private void Compila(string v)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public int Score(Jugador player)
@@ -138,7 +138,7 @@ namespace GWENT_Logic
 
         public bool Destroy(Jugador player, Card card)
         {
-            Console.WriteLine("Discard");
+            Console.WriteLine("Destroy");
             bool discard = Hand[player].Remove(card) || Deck[player].Remove(card);
             if (discard)
                 Graveyard[player].Add(card);
@@ -147,7 +147,10 @@ namespace GWENT_Logic
         public bool DrawCard(Jugador player, int n)
         {
             Console.WriteLine("DrawCard");
+            n =Math.Min(n, Hand[player].Count-8);
+            
             if (Deck[player].Count < n) return false;
+            
             else
             {
                 Hand[player].AddRange(Deck[player].TakeLast(n));

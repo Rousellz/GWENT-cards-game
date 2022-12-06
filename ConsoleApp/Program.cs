@@ -46,6 +46,7 @@ Console.WriteLine("graveyard");
 Show(juego.Graveyard[ply1]);
 /*Console.WriteLine("mano");
 Show(juego.hand[ply1]);*/
+juego.RunNextMove();
 static void Show(ICollection<Card> cards)
 {
     foreach (Card card in cards)
