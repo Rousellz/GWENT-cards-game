@@ -67,10 +67,15 @@ namespace GWENT_Logic
                 [player1] = false,
                 [player2] = false,
             };
+            ScoreTable = new Dictionary<Jugador, int>
+            {
+                [player1] = 0,
+                [player2] = 0,
+            };
             this.player1 = player1;
             this.player2 = player2;
             PlayerInTurn = ((new Random().Next(0, 1) == 0) ? player1 : player2);
-            
+
         }
 
 
@@ -80,8 +85,8 @@ namespace GWENT_Logic
             Console.WriteLine("StarGame");
             ShufflingCards(player1);
             ShufflingCards(player2);
-            DrawCard(player1, 10);
-            DrawCard(player2, 10);
+            DrawCard(player1, 8);
+            DrawCard(player2, 8);
 
         }
 
@@ -102,16 +107,16 @@ namespace GWENT_Logic
         {
 
             Card card = move.Card;
-            if (card.Name=="")
+            if (card.Name == "")
             {
                 IsGived[PlayerInTurn] = true;
-                PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
-                return;  
+
+                return;
             }
-            
+
             if (card.Type == Card.CardType.Especial)
                 Destroy(PlayerInTurn, card);
-            
+
             else
             {
                 Hand[PlayerInTurn].Remove(card);
@@ -147,10 +152,10 @@ namespace GWENT_Logic
         public bool DrawCard(Jugador player, int n)
         {
             Console.WriteLine("DrawCard");
-            n =Math.Min(n, Hand[player].Count-8);
-            
+            n = Math.Min(n, Hand[player].Count - 8);
+
             if (Deck[player].Count < n) return false;
-            
+
             else
             {
                 Hand[player].AddRange(Deck[player].TakeLast(n));
@@ -189,6 +194,13 @@ namespace GWENT_Logic
             int ply1Score = Score(player1);
             int ply2Score = Score(player2);
             if (ply1Score > ply2Score) ScoreTable[player1]++;
+            if (ply1Score < ply2Score) ScoreTable[player2]++;
+            else
+            {
+
+                ScoreTable[player1]++;
+                ScoreTable[player2]++;
+            }
         }
 
         private void PenalizePlayer(Jugador player)
@@ -200,7 +212,7 @@ namespace GWENT_Logic
         private bool IsAValidMove(Move move)
         {
             if (!Hand[PlayerInTurn].Contains(move.Card)) Console.WriteLine("This is not a valid move");
-            return Hand[PlayerInTurn].Contains(move.Card);   
+            return Hand[PlayerInTurn].Contains(move.Card);
         }
 
 
@@ -211,8 +223,10 @@ namespace GWENT_Logic
             {
                 Turn++;
 
+                PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
+                if (IsGived[PlayerInTurn]) PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
 
-                yield return PlayerInTurn.Play(); ;
+                yield return PlayerInTurn.Play(this ,Hand[PlayerInTurn]); ;
             }
         }
 

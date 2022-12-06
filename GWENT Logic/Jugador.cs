@@ -25,7 +25,7 @@ namespace GWENT_Logic
         /// <summary> Devuelve la jugada seleccionada por el jugador. </summary>
     
         
-        public abstract Move Play();
+        public abstract Move Play(JuegoGWENT game, IEnumerable<Card> hand);
 
         public override string ToString()
         {

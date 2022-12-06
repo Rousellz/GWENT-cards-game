@@ -15,9 +15,20 @@ namespace GWENT_Logic
         }
 
         /// <summary> Devuelve la jugada seleccionada por el jugador. </summary>
-        public override Move Play()
+
+        public override Move Play(JuegoGWENT game, IEnumerable<Card> hand)
         {
-            throw new NotImplementedException();
+            Card card = hand.ElementAt(new Random().Next(0, hand.Count()));
+            for (int i = 0; i < 2; i++)
+                for (int j = 0; j<5; j++)
+                {
+                    if (game.Field[this][i, j] == null)
+                    {
+                        return new Move(card, (i, j));
+                    } ;
+                }
+            return new Move(new Card("",0), (0,0));
+
         }
     }
 }
