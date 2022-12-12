@@ -37,7 +37,7 @@ Show(juego.Graveyard[ply1]);
 
 
 juego.DrawCard(ply1, 4);
-juego.Destroy(ply1, juego.Hand[ply1][0]);
+juego.Destroy(juego.Hand[ply1][0]);
 Console.WriteLine("deck");
 Show(juego.Deck[ply1]);
 Console.WriteLine("hand");

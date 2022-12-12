@@ -16,9 +16,10 @@ namespace GWENT_Logic
         public Dictionary<Jugador, List<Card>> Hand { get; private set; }
         public Dictionary<Jugador, List<Card>> Deck { get; private set; }
         public Dictionary<Jugador, List<Card>> Graveyard { get; private set; }
-        public Jugador player1;
-        public Jugador player2;
+        public Jugador Player1 { get; private set; }
+        public Jugador Player2 { get; private set; }
 
+        public Dictionary<Card, int> ActualPower { get; private set; } = new Dictionary<Card, int>();
         public Dictionary<Jugador, int> ScoreTable { get; private set; }
 
 
@@ -28,7 +29,7 @@ namespace GWENT_Logic
         public Dictionary<Jugador, bool> HasPlayed { get; private set; }
         public bool IsFinished
         {
-            get => IsGived[player1] && IsGived[player2];
+            get => ScoreTable[Player1] == 3 || ScoreTable[Player1] == 3;
             private set
             {
             }
@@ -72,9 +73,9 @@ namespace GWENT_Logic
                 [player1] = 0,
                 [player2] = 0,
             };
-            this.player1 = player1;
-            this.player2 = player2;
-            PlayerInTurn = ((new Random().Next(0, 1) == 0) ? player1 : player2);
+            this.Player1 = player1;
+            this.Player2 = player2;
+            PlayerInTurn = ((new Random().Next(0, 1) == 0) ? Player1 : Player2);
 
         }
 
@@ -83,10 +84,10 @@ namespace GWENT_Logic
         public void StarGame()
         {
             Console.WriteLine("StarGame");
-            ShufflingCards(player1);
-            ShufflingCards(player2);
-            DrawCard(player1, 8);
-            DrawCard(player2, 8);
+            ShufflingCards(Player1);
+            ShufflingCards(Player2);
+            DrawCard(Player1, 8);
+            DrawCard(Player2, 8);
 
         }
 
@@ -110,22 +111,55 @@ namespace GWENT_Logic
             if (card.Name == "")
             {
                 IsGived[PlayerInTurn] = true;
-
+               
+                
+                if(IsGived[Player1] && IsGived[Player2])
+                {
+                    NewRound();
+                }
                 return;
             }
 
             if (card.Type == Card.CardType.Especial)
-                Destroy(PlayerInTurn, card);
+                Destroy(card);
 
             else
             {
                 Hand[PlayerInTurn].Remove(card);
                 Field[PlayerInTurn][move.Position.Item1, move.Position.Item2] = card;
+                ActualPower[card] = card.Power;
             }
             Compila(card.Efect());
-
+            DestroyDeathCards();
         }
 
+        private void NewRound()
+        {
+            PlayerInTurn = ((new Random().Next(0, 1) == 0) ? Player1 : Player2);
+            Turn = 0;
+            foreach (Jugador player in new Jugador[] { Player1, Player2 })
+            {
+                IsGived[player] = false;
+                DrawCard(player, 3);
+                for (int i = 0; i < Field[player].GetLength(0); i++)
+                    for (int j = 0; j < Field[player].GetLength(1); j++)
+                        Destroy(Field[player][i, j]);
+            }
+        }
+
+        void DestroyDeathCards()
+        {
+            
+            foreach (Jugador player in new Jugador[] { Player1, Player2 })
+            {
+                for (int i = 0; i < Field[player].GetLength(0); i++)
+                    for (int j = 0; j < Field[player].GetLength(1); j++)
+                        if (Field[player][i, j].Power <= 0)
+                        {
+                            Destroy(Field[player][i, j]);
+                        }
+            }
+        }
         private void Compila(string v)
         {
             //throw new NotImplementedException();
@@ -136,19 +170,34 @@ namespace GWENT_Logic
             int score = 0;
             foreach (Card item in Field[player])
             {
-                score += item.Power;
+                score += ActualPower[item];
             }
             return score;
         }
 
-        public bool Destroy(Jugador player, Card card)
+        public bool Destroy(Card card)
         {
             Console.WriteLine("Destroy");
-            bool discard = Hand[player].Remove(card) || Deck[player].Remove(card);
-            if (discard)
-                Graveyard[player].Add(card);
-            return discard;
+
+            bool finded = false;
+            foreach (Jugador player in new Jugador[] { Player1, Player2 })
+            {
+                finded = Hand[player].Remove(card) || Deck[player].Remove(card);
+                for (int i = 0; i < Field[player].GetLength(0); i++)
+                    for (int j = 0; j < Field[player].GetLength(1); j++)
+                        if (Field[player][i, j] == card)
+                        {
+                            Field[player][i, j] = null;
+                            finded = true;
+                        }
+
+                if (finded)
+                    Graveyard[player].Add(card);
+
+            }
+            return finded;
         }
+
         public bool DrawCard(Jugador player, int n)
         {
             Console.WriteLine("DrawCard");
@@ -191,22 +240,21 @@ namespace GWENT_Logic
         }
         private void UpdateScoreTable()
         {
-            int ply1Score = Score(player1);
-            int ply2Score = Score(player2);
-            if (ply1Score > ply2Score) ScoreTable[player1]++;
-            if (ply1Score < ply2Score) ScoreTable[player2]++;
+            int ply1Score = Score(Player1);
+            int ply2Score = Score(Player2);
+            if (ply1Score > ply2Score) ScoreTable[Player1]++;
+            else if (ply1Score < ply2Score) ScoreTable[Player2]++;
             else
             {
-
-                ScoreTable[player1]++;
-                ScoreTable[player2]++;
+                ScoreTable[Player1]++;
+                ScoreTable[Player2]++;
             }
         }
-
+        
         private void PenalizePlayer(Jugador player)
         {
             InvalidMoveCommitted = true;
-            ScoreTable[((player == player1) ? player2 : player1)]++;
+            ScoreTable[((player == Player1) ? Player2 : Player1)]++;
         }
 
         private bool IsAValidMove(Move move)
@@ -223,10 +271,10 @@ namespace GWENT_Logic
             {
                 Turn++;
 
-                PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
-                if (IsGived[PlayerInTurn]) PlayerInTurn = ((PlayerInTurn == player2) ? player1 : player2);
+                Jugador other = ((PlayerInTurn == Player2) ? Player1 : Player2);
+                if (!IsGived[other]) PlayerInTurn = other;
 
-                yield return PlayerInTurn.Play(this ,Hand[PlayerInTurn]); ;
+                yield return PlayerInTurn.Play(this, Hand[PlayerInTurn]);
             }
         }
 

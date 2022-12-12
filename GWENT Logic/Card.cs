@@ -26,7 +26,6 @@ namespace GWENT_Logic
         public string Name { get; }
         public string Description { get; } = "";
         public int Power { get; }
-
         public override string ToString()
         {
             return Name + " " + Power;
