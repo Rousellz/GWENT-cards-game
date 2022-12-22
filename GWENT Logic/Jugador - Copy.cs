@@ -27,7 +27,8 @@ namespace GWENT_Logic
                         return new Move(card, (i, j));
                     } ;
                 }
-            return new Move(new Card("",0), (0,0));
+            return null;
+          //  return new Move(new Card("",0), (0,0));
 
         }
     }
