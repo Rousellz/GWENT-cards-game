@@ -8,7 +8,7 @@ namespace GWENT_Logic;
 [System.Serializable]
 public class Card 
 { 
-    public Card(int id,string name, int power, string description,string effect,string imageurl,EfectType efectype)
+    public Card(int id,string name="", int power = 1, string description = "", string effect="", string imageurl= "", EfectType efectype = EfectType.NoTarget)
     { 
        //Armor = armor; 
        Name = name;
@@ -28,6 +28,11 @@ public class Card
     public string Efect;
     public string ImageUrl;
     public EfectType Efecttype;
+
+    public override string ToString()
+    {
+        return Id.ToString();  
+    }
 }
 
 
